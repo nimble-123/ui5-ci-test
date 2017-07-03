@@ -1,7 +1,19 @@
 language: node_js
+
 node_js:
-  - "node"
+  - 'stable'
+
 notifications:
     slack: zeitteam:sYG58AkS6aJBsN8cLirAtL9E
-before_script:
+
+before_deploy:
   - npm install -g grunt-cli
+  - npm run build
+
+deploy:
+  provider: script
+  script:
+    - 'echo "TODO: deploy the app. Directory listing:" && ls -R dist'
+  skip_cleanup: true
+  on:
+    branch: master
