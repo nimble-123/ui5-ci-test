@@ -1,0 +1,7 @@
+language: node_js
+node_js:
+  - "node"
+notifications:
+    slack: zeitteam:sYG58AkS6aJBsN8cLirAtL9E
+before_script:
+  - npm install -g grunt-cli
