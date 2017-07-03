@@ -1,0 +1,9 @@
+{
+	"name": "ui5-ci-test",
+	"version": "0.0.1",
+	"description": "UI5 CI Test",
+	"private": true,
+	"devDependencies": {
+		"@sap/grunt-sapui5-bestpractice-build": "^1.3.17"
+	}
+}
