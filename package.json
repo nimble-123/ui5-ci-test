@@ -18,7 +18,6 @@
 		"grunt-mkdir": "1.0.0",
 		"grunt-nexus-deployer": "0.0.8",
 		"grunt-openui5": "0.9.0",
-		"grunt-zip": "0.17.1",
-		"node-rfc": "0.1.11"
+		"grunt-zip": "0.17.1"
 	}
 }
