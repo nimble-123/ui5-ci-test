@@ -1,0 +1,10 @@
+{
+  "name": "ui5-ci-test",
+  "description": "UI5 CI Test",
+  "private": true,
+  "dependencies": {
+    "openui5-sap.ui.core": "openui5/packaged-sap.ui.core",
+    "openui5-sap.m": "openui5/packaged-sap.m",
+    "openui5-themelib_sap_belize": "openui5/packaged-themelib_sap_belize"
+  }
+}

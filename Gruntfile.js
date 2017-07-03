@@ -1,228 +1,210 @@
-module.exports = function(grunt) {
-	'use strict';
-	grunt.loadNpmTasks('@sap/grunt-sapui5-bestpractice-build');
-
-	grunt.registerTask('default', [
-		'clean',
-		'lint',
-		'build'
-	]);
-};
-"use strict";
+'use strict';
 
 module.exports = function(grunt) {
-    // Variables from environment
-    var nexusUser = process.env.NEXUS_DEPLOY_USER;
-    var nexusPassword = process.env.NEXUS_DEPLOY_PASSWORD;
-    var nexusSnapshotRepoURL = process.env.NEXUS_SNAPSHOT_REPO;
 
-    // Project properties
-    var webAppDir = "webapp";
-    var targetDir = "target";
-    var tmpDir = targetDir + "/tmp";
-    var tmpDirDbg = targetDir + "/tmp-dbg";
-    var zipFileSuffix = "-opt-static-abap.zip";
-    var preloadPrefix = "nw/epm/refapps/ext/shop";
-    var nexusGroupId = "com.yourcompany";
+	grunt.initConfig({
 
-    // Project configuration.
-    grunt.initConfig({
-        pkg: grunt.file.readJSON("package.json"),
-        clean: {
-            build: [targetDir]
-        },
-        encoding: {
-             options: {
-                 encoding: "UTF8"
-             },
-             files: {
-                 src: [webAppDir + "/**/*.js", webAppDir + "/**/*.css",
-                      webAppDir + "/**/*.xml", webAppDir + "/**/*.json",
-                       webAppDir + "/**/*.html", webAppDir + "/**/*.properties"]
-             }
-        },
-        eslint: {
-            options: {
-                configFile: ".eslintrc.json"
-            },
-            target: [webAppDir + "/**/*.js"]
-        },
-        copy: {
-            copyToDbg: {
-                files: [
-                    {
-                        expand: true,
-                        src: "**/*.js",
-                        dest: tmpDirDbg,
-                        cwd: webAppDir,
-                        filter: function(filepath) {
-                            // prevent js from localService to be copied
-                            return !filepath.match(new RegExp(webAppDir + "(\\/|\\\\)localService", "gi"));
-                        }
-                    },
-                    {
-                        expand: true,
-                        src: "**/*.css",
-                        dest: tmpDirDbg,
-                        cwd: webAppDir
-                    }]
-            },
-            copyToTmp: {
-                files: [
-                    {
-                        expand: true,
-                        src: "**/*.js",
-                        dest: tmpDir,
-                        cwd: webAppDir,
-                        filter: function(filepath) {
-                            // prevent js from localService to be copied
-                            return !filepath.match(new RegExp(webAppDir + "(\\/|\\\\)localService", "gi"));
-                        }
-                    },
-                    {
-                        expand: true,
-                        src: "**/*.css",
-                        dest: tmpDir,
-                        cwd: webAppDir
-                    },
-                    {
-                        expand: true,
-                        src: "localService/metadata.xml",
-                        dest: tmpDir,
-                        cwd: webAppDir
-                    },
-                    {
-                        expand: true,
-                        src: "**/*",
-                        dest: tmpDir,
-                        cwd: webAppDir,
-                        filter: function(filepath) {
-                            // prevent js and css files and contents of webapp/test from being copied
-                            return !filepath.match(new RegExp("(" + webAppDir + "(\\/|\\\\)test|${webAppDir}(\\/|\\\\)localService|\\.js$|\\.css$|\\test.html$)", "gi"));
-                        }
-                    }]
-            },
-            copyDbgToTmp: {
-                files: [
-                    {
-                        expand: true,
-                        src: "**/*.js",
-                        dest: tmpDir,
-                        cwd: tmpDirDbg,
-                        rename: function(dest, src) {
-                            return dest + "/" + src.replace(/((\.view|\.fragment|\.controller)?\.js)/, "-dbg$1");
-                        }
-                    },
-                    {
-                        expand: true,
-                        src: "**/*.css",
-                        dest: tmpDir,
-                        cwd: tmpDirDbg,
-                        rename: function(dest, src) {
-                            return dest + "/" + src.replace(".css", "-dbg.css");
-                        }
-                    }]
-            }
-        },
-        uglify: {
-            uglifyTmp: {
-                files: [
-                    {
-                        expand: true,
-                        src: "**/*.js",
-                        dest: tmpDir,
-                        cwd: webAppDir,
-                        filter: function(filepath) {
-                            // prevent js from localService to be copied
-                            return !filepath.match(new RegExp(webAppDir + "(\\/|\\\\)localService", "gi"));
-                        }
-                    }]
-            },
-            uglifyPreload: {
-                files: [
-                    {
-                        expand: true,
-                        src: tmpDir + "/Component-preload.js"
-                    }]
-            }
-        },
-        cssmin: {
-            build: {
-                files: [
-                    {
-                        expand: true,
-                        src: "**/*.css",
-                        dest: tmpDir,
-                        cwd: webAppDir
-                    }]
-            }
-        },
-        openui5_preload: {
-            preloadDbg: {
-                options: {
-                    resources: {
-                        cwd: tmpDirDbg,
-                        src: ["**/*.js"],
-                        prefix: preloadPrefix
-                    },
-                    compress: false,
-                    dest: tmpDirDbg
-                },
-                components: true
-            },
-            preloadTmp: {
-                options: {
-                    resources: {
-                        cwd: tmpDir,
-                        src: ["**/*.js"],
-                        prefix: preloadPrefix
-                    },
-                    compress: false,
-                    dest: tmpDir
-                },
-                components: true
-            }
-        },
-        nexusDeployer: {
-            build: {
-                options: {
-                    groupId: nexusGroupId,
-                    artifactId: "<%= pkg.name %>",
-                    version: "<%= pkg.version %>-SNAPSHOT",
-                    packaging: "zip",
-                    auth: {
-                        username: nexusUser,
-                        password: nexusPassword
-                    },
-                    pomDir: targetDir + "/pom",
-                    url: nexusSnapshotRepoURL,
-                    uploadMetadata: false,
-                    artifact: targetDir + "/<%= pkg.name %>" + zipFileSuffix
-                }
-            }
-        },
-        zip: {
-            build: {
-                cwd: tmpDir,
-                src: tmpDir + "/**/*",
-                dest: targetDir + "/<%= pkg.name %>" + zipFileSuffix
-            }
-        }
-    });
+		connect: {
+			options: {
+				port: 8080,
+				hostname: '*'
+			},
+			src: {},
+			dist: {}
+		},
 
-    grunt.loadNpmTasks("grunt-contrib-clean");
-    grunt.loadNpmTasks("grunt-contrib-copy");
-    grunt.loadNpmTasks("grunt-contrib-uglify");
-    grunt.loadNpmTasks("grunt-contrib-cssmin");
-    grunt.loadNpmTasks("grunt-encoding");
-    grunt.loadNpmTasks("grunt-zip");
-    grunt.loadNpmTasks("grunt-openui5");
-    grunt.loadNpmTasks("grunt-nexus-deployer");
-    grunt.loadNpmTasks("grunt-eslint");
+		openui5_connect: {
+			options: {
+				resources: [
+					'bower_components/openui5-sap.ui.core/resources',
+					'bower_components/openui5-sap.m/resources',
+					'bower_components/openui5-themelib_sap_belize/resources'
+				],
+				testresources: [
+					'bower_components/openui5-sap.ui.core/test-resources',
+					'bower_components/openui5-sap.m/test-resources',
+					'bower_components/openui5-themelib_sap_belize/test-resources'
+				],
+				cors: {
+					origin: 'http://localhost:<%= karma.options.port %>'
+				}
+			},
+			src: {
+				options: {
+					appresources: 'webapp'
+				}
+			},
+			dist: {
+				options: {
+					appresources: 'dist'
+				}
+			}
+		},
 
-    grunt.registerTask("default", ["clean", "copy:copyToDbg", "openui5_preload:preloadDbg", "copy:copyToTmp",
-          "uglify:uglifyTmp", "cssmin", "openui5_preload:preloadTmp", "copy:copyDbgToTmp",
-          "uglify:uglifyPreload"]);
-    grunt.registerTask("createZip", ["zip"]);
-    //grunt.registerTask("deployToNexus", ["nexusDeployer"]);
+		openui5_preload: {
+			component: {
+				options: {
+					resources: {
+						cwd: 'webapp',
+						prefix: 'de.nlsltz.test.ciui5-ci-test',
+						src: [
+							'**/*.js',
+							'**/*.fragment.html',
+							'**/*.fragment.json',
+							'**/*.fragment.xml',
+							'**/*.view.html',
+							'**/*.view.json',
+							'**/*.view.xml',
+							'**/*.properties',
+							'manifest.json',
+							'!test/**'
+						]
+					},
+					dest: 'dist'
+				},
+				components: true
+			}
+		},
+
+		clean: {
+			dist: 'dist',
+			coverage: 'coverage'
+		},
+
+		copy: {
+			dist: {
+				files: [ {
+					expand: true,
+					cwd: 'webapp',
+					src: [
+						'**',
+						'!test/**'
+					],
+					dest: 'dist'
+				} ]
+			}
+		},
+
+		eslint: {
+			webapp: ['webapp']
+		},
+
+		karma: {
+			options: {
+				basePath: 'webapp',
+				frameworks: ['openui5', 'qunit'],
+				openui5: {
+					path: 'http://localhost:8080/resources/sap-ui-core.js'
+				},
+				client: {
+					openui5: {
+						config: {
+							theme: 'sap_belize',
+							language: 'EN',
+							bindingSyntax: 'complex',
+							compatVersion: 'edge',
+							preload:'async',
+							resourceroots: {'sap.ui.demo.todo': './base'}
+						}
+					}
+				},
+				files: [
+					{ pattern: 'test/karma-main.js', included: true,  served: true, watched: true },
+					{ pattern: '**',                 included: false, served: true, watched: true }
+				],
+				proxies: {
+					'/base/resources': 'http://localhost:8080/resources',
+					'/base/test-resources': 'http://localhost:8080/test-resources',
+				},
+				reporters: ['progress'],
+				port: 9876,
+				logLevel: 'INFO',
+				browsers: ['Chrome']
+			},
+			ci: {
+				singleRun: true,
+				browsers: ['PhantomJS'],
+				preprocessors: {
+					'{webapp,webapp/!(test)}/*.js': ['coverage']
+				},
+				coverageReporter: {
+					includeAllSources: true,
+					reporters: [
+						{
+							type: 'html',
+							dir: '../coverage/'
+						},
+						{
+							type: 'text'
+						}
+					],
+					check: {
+						each: {
+							statements: 100,
+							branches: 100,
+							functions: 100,
+							lines: 100
+						}
+					}
+				},
+				reporters: ['progress', 'coverage'],
+			},
+			watch: {
+				client: {
+					clearContext: false,
+					qunit: {
+						showUI: true
+					}
+				}
+			},
+			coverage: {
+				singleRun: true,
+				browsers: ['PhantomJS'],
+				preprocessors: {
+					'{webapp,webapp/!(test)}/*.js': ['coverage']
+				},
+				coverageReporter: {
+					includeAllSources: true,
+					reporters: [
+						{
+							type: 'html',
+							dir: '../coverage/'
+						},
+						{
+							type: 'text'
+						}
+					]
+				},
+				reporters: ['progress', 'coverage'],
+			}
+		}
+
+	});
+
+	// These plugins provide necessary tasks.
+	grunt.loadNpmTasks('grunt-contrib-connect');
+	grunt.loadNpmTasks('grunt-contrib-clean');
+	grunt.loadNpmTasks('grunt-contrib-copy');
+	grunt.loadNpmTasks('grunt-openui5');
+	grunt.loadNpmTasks('grunt-eslint');
+	grunt.loadNpmTasks('grunt-karma');
+
+	// Server task
+	grunt.registerTask('serve', function(target) {
+		grunt.task.run('openui5_connect:' + (target || 'src') + ':keepalive');
+	});
+
+	// Linting task
+	grunt.registerTask('lint', ['eslint']);
+
+	// Test tasks
+	grunt.registerTask('test', ['clean:coverage', 'openui5_connect:src', 'karma:ci']);
+	grunt.registerTask('watch', ['openui5_connect:src', 'karma:watch']);
+	grunt.registerTask('coverage', ['clean:coverage', 'openui5_connect:src', 'karma:coverage']);
+
+	// Build task
+	grunt.registerTask('build', ['clean:dist', 'openui5_preload', 'copy']);
+
+	// Default task
+	grunt.registerTask('default', ['serve']);
 };
